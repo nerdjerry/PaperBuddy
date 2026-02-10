@@ -8,6 +8,11 @@ import pymupdf4llm
 from lisette import Chat
 import tempfile
 import os
+from dotenv import load_dotenv
+from config import SYSTEM_PROMPT_TEMPLATE, DEFAULT_MODEL, DEFAULT_TEMPERATURE
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def create_system_prompt(paper_txt):
@@ -20,28 +25,7 @@ def create_system_prompt(paper_txt):
     Returns:
         A formatted system prompt string
     """
-    return f"""
-You are helping someone understand an academic paper.
-Here is the paper \n
-
-{paper_txt}
-
-CRITICAL RULES:
-1. NEVER explain everything at once. Take ONE small step, then STOP and wait.
-2. ALWAYS start by asking what the learner already knows about the topic.
-3. After each explanation, ask a question to check understanding OR ask what they want to explore next.
-4. Keep responses SHORT (2-4 paragraphs max). End with a question.
-5. Use concrete examples and analogies before math. 
-6. Build foundations with code - Teach unfamiliar mathematical concepts through small numpy experiments rather than pure theory. Let the learner run code and observe patterns.
-7. If they ask "explain X", first ask what parts of X they already understand.
-8. Use string format like this for formula display `L_ij = q_i × q_j × exp(-α × D_ij^γ)`.
-
-TEACHING FLOW:
-- Assess background → Build intuition with examples → Connect to math → Let learner guide direction
-
-BAD (don't do this):
-"Here's everything about DPPs: [wall of text with all equations]"
-"""
+    return SYSTEM_PROMPT_TEMPLATE.format(paper_txt=paper_txt)
 
 # Configure the Streamlit page
 st.set_page_config(
@@ -52,6 +36,11 @@ st.set_page_config(
 
 # Display the main title
 st.title("📚 Research Paper Tutor")
+
+# Verify OpenAI API key is set
+if not os.getenv("OPENAI_API_KEY"):
+    st.error("⚠️ OPENAI_API_KEY not found in environment variables. Please set it in your .env file.")
+    st.stop()
 
 # Initialize session state variables to persist data across reruns
 # session_state maintains values across Streamlit reruns
@@ -102,9 +91,9 @@ if uploaded_file is not None and st.session_state.paper_txt is None:
             # Initialize the LLM using lisette Chat
             # Chat is a lightweight wrapper over litellm for easy conversation management
             st.session_state.llm = Chat(
-                model="gpt-4o-mini",  # Use OpenAI's GPT-4o-mini model
+                model=DEFAULT_MODEL,  # Use model from config
                 sp=system_prompt,  # Set the system prompt using 'sp' parameter
-                temp=0.4,  # Moderate temperature for balanced responses (0.3-0.5 range)
+                temp=DEFAULT_TEMPERATURE,  # Temperature from config
             )
             
             # Show success message
@@ -127,9 +116,9 @@ if st.session_state.paper_txt is not None:
         if st.session_state.llm:
             system_prompt = create_system_prompt(st.session_state.paper_txt)
             st.session_state.llm = Chat(
-                model="gpt-4o-mini",
+                model=DEFAULT_MODEL,
                 sp=system_prompt,
-                temp=0.4,
+                temp=DEFAULT_TEMPERATURE,
             )
         st.rerun()  # Rerun the app to reflect the cleared state
     
@@ -160,12 +149,16 @@ if st.session_state.paper_txt is not None:
                 # Chat instance is callable - conversation history is automatically maintained
                 response = st.session_state.llm(prompt)
                 
+                # Extract the message content from the response
+                # response is a ModelResponse object, we need to get the actual text content
+                response_text = response.choices[0].message.content
+                
                 # Display the full response
-                message_placeholder.markdown(response)
+                message_placeholder.markdown(response_text)
                 
                 # Add assistant response to chat history
                 st.session_state.messages.append(
-                    {"role": "assistant", "content": response}
+                    {"role": "assistant", "content": response_text}
                 )
                 
             except Exception as e:
