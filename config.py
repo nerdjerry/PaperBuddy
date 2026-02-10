@@ -27,5 +27,9 @@ BAD (don't do this):
 """
 
 # LLM Configuration
-DEFAULT_MODEL = "gpt-5-mini"
+DEFAULT_MODEL = "gpt-4o-mini"
 DEFAULT_TEMPERATURE = 0.4
+
+# Paper processing limits
+MAX_PAPER_CHARS = 100000  # Approximately 25k tokens for GPT-4o-mini
+WARNING_PAPER_CHARS = 80000  # Show warning above this threshold
