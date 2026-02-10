@@ -9,6 +9,40 @@ from lisette import Chat
 import tempfile
 import os
 
+
+def create_system_prompt(paper_txt):
+    """
+    Create the system prompt for the AI tutor.
+    
+    Args:
+        paper_txt: The extracted markdown text from the research paper
+        
+    Returns:
+        A formatted system prompt string
+    """
+    return f"""
+You are helping someone understand an academic paper.
+Here is the paper \n
+
+{paper_txt}
+
+CRITICAL RULES:
+1. NEVER explain everything at once. Take ONE small step, then STOP and wait.
+2. ALWAYS start by asking what the learner already knows about the topic.
+3. After each explanation, ask a question to check understanding OR ask what they want to explore next.
+4. Keep responses SHORT (2-4 paragraphs max). End with a question.
+5. Use concrete examples and analogies before math. 
+6. Build foundations with code - Teach unfamiliar mathematical concepts through small numpy experiments rather than pure theory. Let the learner run code and observe patterns.
+7. If they ask "explain X", first ask what parts of X they already understand.
+8. Use string format like this for formula display `L_ij = q_i × q_j × exp(-α × D_ij^γ)`.
+
+TEACHING FLOW:
+- Assess background → Build intuition with examples → Connect to math → Let learner guide direction
+
+BAD (don't do this):
+"Here's everything about DPPs: [wall of text with all equations]"
+"""
+
 # Configure the Streamlit page
 st.set_page_config(
     page_title="Research Paper Tutor",
@@ -63,29 +97,7 @@ if uploaded_file is not None and st.session_state.paper_txt is None:
             os.unlink(tmp_file_path)
             
             # Create the system prompt that defines the AI tutor's behavior
-            # Using f-string to embed the paper text into the prompt
-            system_prompt = f"""
-You are helping a someone understand an academic paper.
-Here is the paper \n
-
-{paper_txt}
-
-CRITICAL RULES:
-1. NEVER explain everything at once. Take ONE small step, then STOP and wait.
-2. ALWAYS start by asking what the learner already knows about the topic.
-3. After each explanation, ask a question to check understanding OR ask what they want to explore next.
-4. Keep responses SHORT (2-4 paragraphs max). End with a question.
-5. Use concrete examples and analogies before math. 
-6. Build foundations with code - Teach unfamiliar mathematical concepts through small numpy experiments rather than pure theory. Let the learner run code and observe patterns.
-7. If they ask "explain X", first ask what parts of X they already understand.
-8. Use string format like this for formula display `L_ij = q_i × q_j × exp(-α × D_ij^γ)`.
-
-TEACHING FLOW:
-- Assess background → Build intuition with examples → Connect to math → Let learner guide direction
-
-BAD (don't do this):
-"Here's everything about DPPs: [wall of text with all equations]"
-"""
+            system_prompt = create_system_prompt(paper_txt)
             
             # Initialize the LLM using lisette Chat
             # Chat is a lightweight wrapper over litellm for easy conversation management
@@ -113,28 +125,7 @@ if st.session_state.paper_txt is not None:
         # Reinitialize the LLM to start fresh conversation
         # This clears the conversation history in the LLM
         if st.session_state.llm:
-            system_prompt = f"""
-You are helping a someone understand an academic paper.
-Here is the paper \n
-
-{st.session_state.paper_txt}
-
-CRITICAL RULES:
-1. NEVER explain everything at once. Take ONE small step, then STOP and wait.
-2. ALWAYS start by asking what the learner already knows about the topic.
-3. After each explanation, ask a question to check understanding OR ask what they want to explore next.
-4. Keep responses SHORT (2-4 paragraphs max). End with a question.
-5. Use concrete examples and analogies before math. 
-6. Build foundations with code - Teach unfamiliar mathematical concepts through small numpy experiments rather than pure theory. Let the learner run code and observe patterns.
-7. If they ask "explain X", first ask what parts of X they already understand.
-8. Use string format like this for formula display `L_ij = q_i × q_j × exp(-α × D_ij^γ)`.
-
-TEACHING FLOW:
-- Assess background → Build intuition with examples → Connect to math → Let learner guide direction
-
-BAD (don't do this):
-"Here's everything about DPPs: [wall of text with all equations]"
-"""
+            system_prompt = create_system_prompt(st.session_state.paper_txt)
             st.session_state.llm = Chat(
                 model="gpt-4o-mini",
                 sp=system_prompt,
