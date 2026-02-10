@@ -1,0 +1,5 @@
+streamlit>=1.28.0
+pymupdf4llm>=0.0.5
+lisette>=0.1.0
+litellm>=1.0.0
+openai>=1.0.0
