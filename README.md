@@ -68,6 +68,10 @@ The AI tutor follows these guidelines:
 - OpenAI API key
 - Dependencies listed in `requirements.txt`
 
+## Screenshots
+<img width="663" height="572" alt="Screenshot 2026-02-10 at 12 00 00 PM" src="https://github.com/user-attachments/assets/2ae6db1e-7ad5-40d4-ad93-c98a3446308a" />
+<img width="671" height="586" alt="Screenshot 2026-02-10 at 11 56 34 AM" src="https://github.com/user-attachments/assets/726fbcdd-1550-4dc3-b239-27bd79c8fc59" />
+
 ## Contributing
 
 Feel free to open issues or submit pull requests!
