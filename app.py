@@ -5,7 +5,7 @@ using an OpenAI model via lisette (lightweight wrapper over litellm).
 
 import streamlit as st
 import pymupdf4llm
-from lisette import Lisette
+from lisette import Chat
 import tempfile
 import os
 
@@ -87,12 +87,12 @@ BAD (don't do this):
 "Here's everything about DPPs: [wall of text with all equations]"
 """
             
-            # Initialize the LLM using lisette
-            # Lisette is a lightweight wrapper over litellm for easy conversation management
-            st.session_state.llm = Lisette(
+            # Initialize the LLM using lisette Chat
+            # Chat is a lightweight wrapper over litellm for easy conversation management
+            st.session_state.llm = Chat(
                 model="gpt-4o-mini",  # Use OpenAI's GPT-4o-mini model
-                system_prompt=system_prompt,  # Set the system prompt
-                temperature=0.4,  # Moderate temperature for balanced responses (0.3-0.5 range)
+                sp=system_prompt,  # Set the system prompt using 'sp' parameter
+                temp=0.4,  # Moderate temperature for balanced responses (0.3-0.5 range)
             )
             
             # Show success message
@@ -135,10 +135,10 @@ TEACHING FLOW:
 BAD (don't do this):
 "Here's everything about DPPs: [wall of text with all equations]"
 """
-            st.session_state.llm = Lisette(
+            st.session_state.llm = Chat(
                 model="gpt-4o-mini",
-                system_prompt=system_prompt,
-                temperature=0.4,
+                sp=system_prompt,
+                temp=0.4,
             )
         st.rerun()  # Rerun the app to reflect the cleared state
     
@@ -166,8 +166,8 @@ BAD (don't do this):
             
             try:
                 # Send the user's message to the LLM and get response
-                # Lisette automatically maintains conversation history
-                response = st.session_state.llm.ask(prompt)
+                # Chat instance is callable - conversation history is automatically maintained
+                response = st.session_state.llm(prompt)
                 
                 # Display the full response
                 message_placeholder.markdown(response)
