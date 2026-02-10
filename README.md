@@ -9,7 +9,7 @@ PaperBuddy is a Streamlit web application that helps users read and understand r
 - 💬 **Interactive Chat**: Ask questions and have a conversation about the paper
 - 🎓 **Step-by-Step Learning**: The AI tutor guides you through concepts incrementally
 - 🔄 **Clear Chat**: Reset the conversation to start fresh
-- 🤖 **Powered by OpenAI**: Uses GPT-4o-mini for intelligent responses
+- 🤖 **Powered by OpenAI**: Uses GPT-5-mini for intelligent responses
 
 ## Installation
 
